@@ -11,12 +11,15 @@ This tool eliminates the manual process of copying and pasting access tokens bet
 The system operates as a local **sidecar service** consisting of three main components:
 
 ### The Vault (Server)
+
 A lightweight Go-based REST API that runs locally (default port: **9999**) and persists data to a SQLite database.
 
 ### The Client Integration
+
 A minimal HTTP hook implemented in your backend projects (Node.js, Go, Python, etc.) that pushes fresh tokens to the Vault upon successful login.
 
 ### The Automation Script
+
 A Postman pre-request script that queries the Vault based on the target port or domain and injects the authorization header dynamically.
 
 ---
@@ -62,16 +65,19 @@ cd tokenvault
 ```
 
 Build the executable:
+
 ```bash
 go build -o tokenvault .
 ```
+
 (Optional) Add the binary to your system PATH for global access.
 
-
 ## Usage Guide
+
 1. Start the TokenVault Server
 
 Open a terminal window and start the local server. This process must remain running in the background.
+
 ```bash
 ./tokenvault serve
 ```
@@ -83,10 +89,14 @@ Expected output: Listening and serving HTTP on :9999
 TokenVault provides an automated setup command to generate the required JavaScript for Postman.
 
 Run the setup command:
+
 ```bash
 ./tokenvault setup-postman
 ```
+
 Follow the interactive prompts to map local ports to project names.
+
+> **⚠️ CRITICAL:** The string you pass as `project` (e.g., `"realtime-bidding"`) **MUST match exactly** (case-sensitive) the name you map to the port in the Postman setup. If your backend sends `"My-App"` but Postman looks for `"my-app"`, the token fetch will fail.
 
 ### Example mappings:
 
@@ -95,12 +105,12 @@ Follow the interactive prompts to map local ports to project names.
 - The command generates a file named tokenvault_script.js.
 
 ## Postman Setup Steps
+
 - Open Postman
 - Go to Collection Settings
 - Open the Pre-request Script tab
 - Copy the contents of tokenvault_script.js
 - Paste it into the editor and save
-
 
 3. Integrate with Backend Projects
 
@@ -109,6 +119,7 @@ To store tokens, your backend application must send a POST request to TokenVault
 Example: Node.js / Express
 
 Add this immediately after generating the authentication token:
+
 ```bash
 // Fire-and-forget request to TokenVault
 fetch("http://localhost:9999/store", {
@@ -135,13 +146,14 @@ fetch("http://localhost:9999/store", {
 
 - The pre-request script automatically fetches and injects the latest token.
 
-
 ##Troubleshooting
 
 Common Issues
+
 1. Connection Refused / Server Not Reachable
 
 Cause: TokenVault server is not running.
+
 ```bash
 ./tokenvault serve
 ```
@@ -167,7 +179,8 @@ Cause: Running Go files individually instead of the full module.
 Solution:
 
 Use:
-```bash 
+
+```bash
 go run . setup-postman
 ```
 
@@ -179,11 +192,13 @@ Solution:
 Ensure the current user has write access to their home directory.
 
 Database location:
+
 ```bash
 ~/.tokenvault/token.db
 ```
 
 ##Project Structure
+
 ```bash
 tokenvault/
 ├── cmd/                # (Deprecated) Legacy command structure
@@ -195,5 +210,3 @@ tokenvault/
 ├── go.mod              # Go module definitions
 └── README.md           # Project documentation
 ```
-
-
