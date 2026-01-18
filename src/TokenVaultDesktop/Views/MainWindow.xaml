@@ -1,0 +1,176 @@
+<Window x:Class="TokenVaultDesktop.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:TokenVaultDesktop.ViewModels"
+        xmlns:views="clr-namespace:TokenVaultDesktop.Views"
+        mc:Ignorable="d"
+        Title="TokenVault Desktop" 
+        Height="700" 
+        Width="1100"
+        MinHeight="600"
+        MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5"
+        StateChanged="Window_StateChanged"
+        Closing="Window_Closing">
+    
+    <Window.Resources>
+        <!-- Data Templates for View switching -->
+        <DataTemplate DataType="{x:Type vm:PostmanGeneratorViewModel}">
+            <views:PostmanGeneratorView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProjectsViewModel}">
+            <views:ProjectsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TokensViewModel}">
+            <views:TokensView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <views:SettingsView/>
+        </DataTemplate>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Grid.RowSpan="2" Background="#1A1A2E">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Logo/Header -->
+                <StackPanel Grid.Row="0" Margin="20,24,20,32">
+                    <TextBlock Text="🔐 TokenVault" 
+                               FontSize="20" 
+                               FontWeight="Bold" 
+                               Foreground="White"/>
+                    <TextBlock Text="Desktop Edition" 
+                               FontSize="11" 
+                               Foreground="#888888"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+                
+                <!-- Navigation -->
+                <StackPanel Grid.Row="1">
+                    <Button Content="📤  Generate Collection" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Generator"/>
+                    
+                    <Button Content="📁  Projects" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Projects"/>
+                    
+                    <Button Content="🔑  Tokens" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Tokens"/>
+                    
+                    <Button Content="⚙️  Settings" 
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Settings"/>
+                </StackPanel>
+                
+                <!-- Recent Activity -->
+                <Border Grid.Row="2" 
+                        Background="#16162A" 
+                        Padding="16" 
+                        Margin="0,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Recent Tokens" 
+                                   FontSize="12" 
+                                   FontWeight="SemiBold"
+                                   Foreground="#888888"
+                                   Margin="0,0,0,8"/>
+                        
+                        <ItemsControl ItemsSource="{Binding RecentTokens}" 
+                                      MaxHeight="150">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding ProjectName}" 
+                                                   Foreground="#CCCCCC"
+                                                   FontSize="12"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Column="1" 
+                                                   Text="{Binding TimeAgo}"
+                                                   Foreground="#666666"
+                                                   FontSize="10"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <TextBlock Text="No recent tokens"
+                                   Foreground="#555555"
+                                   FontSize="11"
+                                   FontStyle="Italic"
+                                   Visibility="{Binding RecentTokens.Count, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content Area -->
+        <Border Grid.Column="1" Grid.Row="0" Background="#F5F5F5">
+            <ContentControl Content="{Binding CurrentView}" Margin="0"/>
+        </Border>
+        
+        <!-- Status Bar -->
+        <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource StatusBarStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Server Status -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ServerStatus}" 
+                               FontSize="12"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <!-- Last Token Info -->
+                <StackPanel Grid.Column="2" 
+                            Orientation="Horizontal" 
+                            VerticalAlignment="Center"
+                            Visibility="{Binding LastTokenTime, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock Text="Last token: " 
+                               FontSize="12" 
+                               Foreground="#666666"/>
+                    <TextBlock Text="{Binding LastTokenProject}" 
+                               FontSize="12" 
+                               FontWeight="SemiBold"
+                               Foreground="#333333"/>
+                    <TextBlock Text=" @ " 
+                               FontSize="12" 
+                               Foreground="#666666"/>
+                    <TextBlock Text="{Binding LastTokenTime, StringFormat='{}{0:HH:mm:ss}'}" 
+                               FontSize="12" 
+                               Foreground="#666666"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

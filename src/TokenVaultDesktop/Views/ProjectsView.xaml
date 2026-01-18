@@ -1,0 +1,170 @@
+<UserControl x:Class="TokenVaultDesktop.Views.ProjectsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:TokenVaultDesktop.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:ProjectsViewModel}"
+             Background="#F5F5F5">
+    
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="Projects" Style="{StaticResource HeadingStyle}"/>
+            <TextBlock Text="Manage your project configurations and port mappings."
+                       Style="{StaticResource SubheadingStyle}"/>
+        </StackPanel>
+        
+        <!-- Add New Project Form -->
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,24">
+            <StackPanel>
+                <TextBlock Text="Add New Project" 
+                           FontSize="16" 
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,16"/>
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Project Name" Style="{StaticResource LabelStyle}"/>
+                        <TextBox Text="{Binding NewProjectName, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Port" Style="{StaticResource LabelStyle}"/>
+                        <TextBox Text="{Binding NewProjectPort, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="API Base URL" Style="{StaticResource LabelStyle}"/>
+                        <TextBox Text="{Binding NewProjectBaseUrl, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"/>
+                    </StackPanel>
+                    
+                    <Button Grid.Column="6"
+                            Content="+ Add Project"
+                            Command="{Binding AddProjectCommand}"
+                            Style="{StaticResource SuccessButtonStyle}"
+                            VerticalAlignment="Bottom"
+                            Padding="16,10"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+        
+        <!-- Projects List -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- List Header -->
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Saved Projects" 
+                               FontSize="16" 
+                               FontWeight="SemiBold"/>
+                    
+                    <Button Grid.Column="1"
+                            Content="↻ Refresh"
+                            Command="{Binding LoadProjectsCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Padding="12,6"/>
+                </Grid>
+                
+                <!-- Projects DataGrid -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Projects}"
+                          SelectedItem="{Binding SelectedProject}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          Background="White"
+                          BorderThickness="0"
+                          RowHeight="48">
+                    
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" 
+                                            Binding="{Binding Name}" 
+                                            Width="*"
+                                            FontWeight="SemiBold"/>
+                        
+                        <DataGridTextColumn Header="Port" 
+                                            Binding="{Binding Port}" 
+                                            Width="80"/>
+                        
+                        <DataGridTextColumn Header="API Base URL" 
+                                            Binding="{Binding ApiBaseUrl}" 
+                                            Width="*"/>
+                        
+                        <DataGridTextColumn Header="Updated" 
+                                            Binding="{Binding UpdatedAt, StringFormat='{}{0:MMM dd, HH:mm}'}" 
+                                            Width="120"/>
+                        
+                        <DataGridTemplateColumn Header="Actions" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Delete"
+                                            Command="{Binding DataContext.DeleteProjectCommand, 
+                                                      RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource DangerButtonStyle}"
+                                            Padding="8,4"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <!-- Empty State -->
+                <Border Grid.Row="1"
+                        Background="#FAFAFA"
+                        CornerRadius="8"
+                        Padding="32"
+                        Visibility="{Binding Projects.Count, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="📁"
+                                   FontSize="48"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,16"/>
+                        <TextBlock Text="No projects yet"
+                                   FontSize="16"
+                                   Foreground="#666666"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Add a project above to get started"
+                                   FontSize="13"
+                                   Foreground="#999999"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
