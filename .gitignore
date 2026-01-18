@@ -1,9 +1,35 @@
-tokenvault.exe
-tokenvault_script.js
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+publish/
 
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
-*.db
-*.sqlite
+# Rider files
+.idea/
 
-.DS_Store
+# NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Windows image file caches
 Thumbs.db
+ehthumbs.db
+
+# Logs
+*.log
+
+# SQLite database files (user data)
+*.db
+*.db-shm
+*.db-wal

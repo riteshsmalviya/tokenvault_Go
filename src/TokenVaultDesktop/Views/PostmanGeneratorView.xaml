@@ -1,0 +1,225 @@
+<UserControl x:Class="TokenVaultDesktop.Views.PostmanGeneratorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:TokenVaultDesktop.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:PostmanGeneratorViewModel}"
+             Background="#F5F5F5">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32">
+        <StackPanel MaxWidth="800">
+            
+            <!-- Header -->
+            <TextBlock Text="Postman Collection Generator" 
+                       Style="{StaticResource HeadingStyle}"/>
+            <TextBlock Text="Create a ready-to-import Postman collection with Bearer token authentication configured automatically."
+                       Style="{StaticResource SubheadingStyle}"/>
+            
+            <!-- Main Form Card -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,24">
+                <StackPanel>
+                    
+                    <!-- Project Name -->
+                    <StackPanel Margin="0,0,0,20">
+                        <TextBlock Text="Project Name *" Style="{StaticResource LabelStyle}"/>
+                        <TextBox Text="{Binding ProjectName, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 ToolTip="This will be the name of your Postman collection and the project identifier for token lookup"/>
+                    </StackPanel>
+                    
+                    <!-- Port and Base URL -->
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Local Port" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     ToolTip="The port your backend runs on (e.g., 5000, 3000, 8080)"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="API Base URL *" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Text="{Binding ApiBaseUrl, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     ToolTip="The base URL for API requests (e.g., http://localhost:5000)"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Include TokenVault Script -->
+                    <CheckBox Content="Include TokenVault auto-fetch script (recommended)"
+                              IsChecked="{Binding IncludeTokenVaultScript}"
+                              Margin="0,0,0,8"
+                              FontSize="13"/>
+                    <TextBlock Text="When enabled, Postman will automatically fetch the latest token from TokenVault before each request."
+                               FontSize="11"
+                               Foreground="#888888"
+                               Margin="24,0,0,0"/>
+                    
+                </StackPanel>
+            </Border>
+            
+            <!-- Endpoints Section -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,24">
+                <StackPanel>
+                    
+                    <!-- Header with Add Button -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel>
+                            <TextBlock Text="API Endpoints" 
+                                       FontSize="16" 
+                                       FontWeight="SemiBold"
+                                       Foreground="#1A1A2E"/>
+                            <TextBlock Text="Add the endpoints you want in your collection (optional)"
+                                       FontSize="12"
+                                       Foreground="#666666"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                        
+                        <Button Grid.Column="1"
+                                Content="+ Add Endpoint"
+                                Command="{Binding AddEndpointCommand}"
+                                Style="{StaticResource SuccessButtonStyle}"/>
+                    </Grid>
+                    
+                    <!-- Endpoints List -->
+                    <ItemsControl ItemsSource="{Binding Endpoints}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#F8F9FA" 
+                                        CornerRadius="6" 
+                                        Padding="12" 
+                                        Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Method -->
+                                        <ComboBox Grid.Column="0"
+                                                  SelectedValue="{Binding Method}"
+                                                  ItemsSource="{Binding AvailableMethods}"
+                                                  Margin="0,0,8,0"
+                                                  Padding="8,6"
+                                                  FontWeight="SemiBold"/>
+                                        
+                                        <!-- Path -->
+                                        <TextBox Grid.Column="1" 
+                                                 Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"
+                                                 Margin="0,0,8,0"
+                                                 Style="{StaticResource InputTextBoxStyle}"
+                                                 ToolTip="API path (e.g., /api/users, /api/products/{id})"/>
+                                        
+                                        <!-- Name -->
+                                        <TextBox Grid.Column="2" 
+                                                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                                 Margin="0,0,8,0"
+                                                 Style="{StaticResource InputTextBoxStyle}"
+                                                 ToolTip="Request name in Postman"/>
+                                        
+                                        <!-- Auth Toggle -->
+                                        <CheckBox Grid.Column="3"
+                                                  Content="Auth"
+                                                  IsChecked="{Binding RequiresAuth}"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0,0,8,0"
+                                                  ToolTip="Requires authentication"/>
+                                        
+                                        <!-- Remove Button -->
+                                        <Button Grid.Column="4" 
+                                                Content="✕"
+                                                Command="{Binding DataContext.RemoveEndpointCommand, 
+                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource DangerButtonStyle}"
+                                                Width="32"
+                                                Padding="0"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <!-- Empty State -->
+                    <Border Background="#FAFAFA" 
+                            CornerRadius="6" 
+                            Padding="24"
+                            Visibility="{Binding HasEndpoints, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="📝"
+                                       FontSize="32"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="No endpoints added"
+                                       FontSize="14"
+                                       Foreground="#666666"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Click 'Add Endpoint' above, or leave empty for sample requests"
+                                       FontSize="12"
+                                       Foreground="#999999"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    
+                </StackPanel>
+            </Border>
+            
+            <!-- Generate Button -->
+            <Button Content="🚀  Generate Postman Collection"
+                    Command="{Binding GenerateCollectionCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    HorizontalAlignment="Center"
+                    FontSize="16"
+                    Padding="32,16"/>
+            
+            <!-- Status Message -->
+            <TextBlock Text="{Binding StatusMessage}"
+                       HorizontalAlignment="Center"
+                       Margin="0,16,0,0"
+                       FontSize="13"/>
+            
+            <!-- Info Box -->
+            <Border Background="#E3F2FD" 
+                    CornerRadius="8" 
+                    Padding="16" 
+                    Margin="0,24,0,0">
+                <StackPanel>
+                    <TextBlock Text="ℹ️ How it works"
+                               FontWeight="SemiBold"
+                               FontSize="14"
+                               Foreground="#1565C0"
+                               Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap"
+                               FontSize="13"
+                               Foreground="#1976D2">
+                        <Run Text="1."/>
+                        <Run Text="The generated collection includes Bearer token auth using {{token}} variable"/>
+                        <LineBreak/>
+                        <Run Text="2."/>
+                        <Run Text="A pre-request script automatically fetches tokens from TokenVault (localhost:9999)"/>
+                        <LineBreak/>
+                        <Run Text="3."/>
+                        <Run Text="Import the JSON file into Postman and start making authenticated requests!"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+            
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
